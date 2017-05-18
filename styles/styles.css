@@ -23,6 +23,52 @@ main {
   height: 100%;
 }
 
+.toolbar {
+  align-items: center;
+  justify-content: space-around;
+}
+
+.toolbar input:not([type]), .toolbar input[type="text"] {
+  border: none;
+  border-bottom: 1px solid #CCC;
+  padding: 4px 8px;
+  display: block;
+}
+
+.toolbar .map-features input:first-child + label {
+  border-radius: 4px 0 0 4px;
+}
+
+.toolbar .map-features label:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.toolbar input[type="checkbox"] {
+  display: none;
+}
+
+.toolbar input[type="checkbox"] + label {
+  display: block;
+  border: 1px solid #EEE;
+  padding: 4px 8px;
+}
+
+.toolbar input[type="checkbox"]:checked + label {
+  border: 1px solid #999;
+  background: #EEE;
+}
+
+.toolbar input[type="file"] {
+  display: none;
+}
+
+.toolbar button {
+  border: 1px solid #999;
+  background: white;
+  border-radius: 4px;
+  padding: 4px 8px;
+}
+
 .map-container {
   flex: 1 1 0%;
   position: relative;
@@ -59,6 +105,9 @@ main {
   right: 0;
   bottom: 0;
   box-shadow: 0 16px 24px -8px rgba(0, 0, 0, .2);
+  background: transparent;
+  /* can't use vars here because of html2canvas */
+  font-family: "ff-dagny-web-pro", Helvetica Neue, Helvetica, sans-serif; 
 }
 
 .map-frame .resize-handle {
@@ -70,4 +119,13 @@ main {
   height: 12px;
   background: gray;
   border-radius: 100%;
+}
+
+.screenshot .leaflet-control-zoom,
+.screenshot .leaflet-popup-close-button {
+  display: none !important;
+}
+
+.screenshot .map {
+  background: transparent !important;
 }

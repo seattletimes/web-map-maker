@@ -40,7 +40,6 @@
   frame.addEventListener("resize", debounce(scheduleInvalidation));
 
   var drawSVG = async function(element) {
-    console.log(element);
     var svgString = new XMLSerializer().serializeToString(element);
     var DOMURL = self.URL || self.webkitURL || self;
     var img = new Image();
@@ -50,29 +49,32 @@
     return new Promise(function(ok, fail) {
       img.onload = function() {
         // be sure to offset it
-        var svg1 = document.querySelector("svg");
-        var box = svg1.getAttribute("viewBox");
+        var box = element.getAttribute("viewBox");
         var svgOffset = box.split(/\s+|,/).map(Number);
 
-        var svgBounds = svg.getBoundingClientRect();
+        var svgBounds = element.getBoundingClientRect();
         var srcCoords = {
           x: svgOffset[0] * -1 - (svgBounds.width - mapElement.offsetWidth) / 2,
           y: svgOffset[1] *-1 - (svgBounds.height - mapElement.offsetHeight) / 2
-        }
-        ctx.drawImage(img, svgCoords.width, svgCoords.height, svgBounds.width, svgBounds.height);
+        };
+        ctx.drawImage(img, srcCoords.x, srcCoords.y, svgBounds.width, svgBounds.height);
         ok();
       };
       img.src = url;
     });
   };
 
-  var htmlRendering = function() {
-    return new Promise(function(ok, fail) {
-      html2canvas(mapElement, { onrendered: function(rendered) {
-        ctx.drawImage(rendered, 0, 0, mapElement.width, mapElement.height);
-        ok();
-      }})
+  var htmlRendering = async function() {
+    var rendered = await html2canvas(mapElement, {
+      background: undefined,
+      logging: true,
+      width: mapElement.offsetWidth,
+      height: mapElement.offsetHeight
     });
+
+    // document.body.appendChild(rendered);
+    // rendered.setAttribute("style", "position: fixed; border: 1px solid red; top: 0; left: 0; z-index: 9999; opacity: .5");
+    ctx.drawImage(rendered, 0, 0, rendered.width, rendered.height);
   };
 
   var processScreenshot = async function(screenshot) {
@@ -107,9 +109,9 @@
     map.setZoom(map.getZoom() - 0.5);
     map.setZoom(map.getZoom() + 0.5);
 
-    var svgRendering = $("#map svg").length ? drawSVG($.one("svg")) : Promise.resolve();
+    var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
     await svgRendering;
-    await htmlRendering;
+    await htmlRendering();
 
     // create an off-screen anchor tag
     var link = document.createElement("a");
@@ -118,6 +120,8 @@
 
     var click = new MouseEvent("click");
     link.dispatchEvent(click);
+
+    mapElement.classList.remove("screenshot");
   };
 
   $.one(".download").addEventListener("click", downloadImage);
@@ -186,51 +190,6 @@
   };
   sizeSelect.addEventListener("change", onPresetChoice);
 
-  function showPrint() {
-    // swap to print color
-    scene.config.global.road_color = "#98a5ac";
-
-    // bump up size of major roads
-    scene.config.layers.roads.major_road.draw.lines.width[3][1] = "1.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[4][1] = "2.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[5][1] = "3.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[6][1] = "10m";
-
-    // bump up size of minor roads
-    scene.config.layers.roads.minor_road.draw.lines.width[1][1] = "0.5px";
-    scene.config.layers.roads.minor_road.draw.lines.width[2][1] = "0.5px";
-
-    // make water darker
-    scene.config.global.water_color = "#a6bcd3";
-
-    // turn off labels
-    labelsVisible = true;
-    showLabels();
-
-    scene.updateConfig(); // update config
-
-    // update buttons
-    $("#print_btn").addClass("active");
-    $("#web_btn").removeClass("active");
-
-    // hide attribution
-    $(".leaflet-control-attribution").hide();
-
-  }
-
-  function showWeb() {
-    scene.load("map-styles.yaml");
-    buildingsVisible = false;
-    // update buttons
-    $("#print_btn").removeClass("active");
-    $("#web_btn").addClass("active");
-    $("#auto_labels_btn").addClass("active");
-    labelsVisible = true;
-
-    // bring back attribution
-    $(".leaflet-control-attribution").show();
-  }
-
   // styles for geojson pulled from v1.0
   var geoStyles = {
     LineString: { color:"#cd7139", weight: 4, opacity: 1, lineJoin:"round" },
@@ -240,7 +199,7 @@
   geoStyles.MultiPolygon = geoStyles.Polygon;
   geoStyles.MultiLineString = geoStyles.LineString;
 
-  var handleFileSelect = function(evt) {
+  var onFileSelect = function(evt) {
     // add multiple files to the map
     for (var i = 0; i <  evt.target.files.length; i++) {
 
@@ -251,7 +210,7 @@
 
         var contents = e.target.result;
         // turn string into json object
-        var parsedJSON = jQuery.parseJSON(contents);
+        var parsedJSON = JSON.parse(contents);
 
         // add GeoJSON to map
         L.geoJson(parsedJSON, {
@@ -264,5 +223,7 @@
       r.readAsText(f);
     }
   };
+
+  $.one(".file-uploader").addEventListener("change", onFileSelect);
 
 })();

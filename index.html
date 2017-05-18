@@ -20,21 +20,23 @@
 <body>
 
   <main class="vbox">
-    <nav class="toolbar">
-      <input class="popup-text" placeholder="Popup text">
-      <input class="address" placeholder="Address">
+    <nav class="toolbar hbox">
+      <div class="popup-config">
+        <input class="popup-text" placeholder="Popup text">
+        <input class="address" placeholder="Address">
+      </div>
       <select class="size-presets">
         <option value="video">Video</option>
         <option value="large">Featured media</option>
         <option value="small">Locator</option>
         <option value="twitter">Twitter card</option>
       </select>
-      <div class="map-features">
+      <div class="map-features hbox">
         <input class="feature-toggle" type="checkbox" id="terrain">
         <label for="terrain">Terrain</label>
 
-        <input class="feature-toggle" type="checkbox" id="transit">
-        <label for="transit">Transit</label>
+        <!--<input class="feature-toggle" type="checkbox" id="transit">
+        <label for="transit">Transit</label>-->
 
         <input class="feature-toggle" type="checkbox" id="buildings">
         <label for="buildings">Buildings</label>
@@ -59,6 +61,7 @@
   </div>
 
   <!-- load all the JS -->
+  <!-- <script>window.L_DISABLE_3D = true</script> -->
   <script src="js/leaflet.js"></script>
   <script src="js/tangram.min.js"></script>
   <script src="js/html2canvas0.5.js"></script>
