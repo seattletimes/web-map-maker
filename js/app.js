@@ -177,8 +177,12 @@
     state.features = features;
   };
 
-  $.one(".map-features").addEventListener("click", () => updateFeatures());
-  map.on("zoomend", () => updateFeatures());
+  var forceFeatures = {
+    transit: false
+  };
+
+  $.one(".map-features").addEventListener("click", () => updateFeatures(forceFeatures));
+  map.on("zoomend", () => updateFeatures(forceFeatures));
 
   // add presets here to set new possible display sizes
   var sizePresets = {
