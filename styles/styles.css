@@ -1,11 +1,13 @@
 :root {
-
+  --df-serif: "ff-meta-serif-web-pro", Georgia, serif;
+  --df-sans: "ff-dagny-web-pro", Helvetica Neue, Helvetica, sans-serif;
 }
 
 html, body {
   padding: 0;
   margin: 0;
   height: 100%;
+  font-family: var(--df-sans);
 }
 
 .vbox {
@@ -47,6 +49,7 @@ main {
   background: white;
   opacity: .8;
   z-index: 999;
+  font-family: monospace;
 }
 
 .map-frame .map {

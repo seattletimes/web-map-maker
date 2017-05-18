@@ -14,13 +14,15 @@ install.patch(async function() {
   };
 
   var onMove = function(e) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    var bounds = frame.getBoundingClientRect();
-    var width = e.clientX - bounds.left;
-    var height = e.clientY - bounds.top;
-    frame.style.width = `${width}px`;
-    frame.style.height = `${height}px`;
+    if (e && e.clientX) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      var bounds = frame.getBoundingClientRect();
+      var width = e.clientX - bounds.left;
+      var height = e.clientY - bounds.top;
+      frame.style.width = `${width}px`;
+      frame.style.height = `${height}px`;
+    }
     //get actual rendered size
     width = frame.offsetWidth;
     height = frame.offsetHeight;
@@ -35,5 +37,8 @@ install.patch(async function() {
   };
 
   handle.addEventListener("mousedown", onHandleDown);
+  window.addEventListener("resize", onMove);
+
+  onMove();
 
 });
