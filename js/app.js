@@ -4,15 +4,13 @@
   var modules = install.batch("qsa", "geolocation", "util", "debounce", "resizer");
   var [$, geocoder, util, debounce, resizer] = await modules;
 
+  // state is a grab-bag of settings, used instead of random globals
   var state = {
-    features: {},
-    dimensions: {
-      width: 800,
-      height: 600
-    }
+    features: {}
   };
+  // canvas used for drawing the downloaded image
   var canvas = document.createElement("canvas");
-  var ctx = canvas.getContext("2d");
+  var context = canvas.getContext("2d");
 
   var frame = $.one(".map-frame");
   var mapElement = $.one(".map");
@@ -33,12 +31,14 @@
   vectorLayer.addTo(map);
   var scene = vectorLayer.scene;
 
+  //call this to let the map know that its dimensions have changed
   var scheduleInvalidation = function() {
     setTimeout(() => map.invalidateSize());
   };
 
   frame.addEventListener("resize", debounce(scheduleInvalidation));
 
+  // renders SVG to a canvas (for GeoJSON layers, mostly)
   var drawSVG = async function(element) {
     var svgString = new XMLSerializer().serializeToString(element);
     var DOMURL = self.URL || self.webkitURL || self;
@@ -57,13 +57,14 @@
           x: svgOffset[0] * -1 - (svgBounds.width - mapElement.offsetWidth) / 2,
           y: svgOffset[1] *-1 - (svgBounds.height - mapElement.offsetHeight) / 2
         };
-        ctx.drawImage(img, srcCoords.x, srcCoords.y, svgBounds.width, svgBounds.height);
+        context.drawImage(img, srcCoords.x, srcCoords.y, svgBounds.width, svgBounds.height);
         ok();
       };
       img.src = url;
     });
   };
 
+  // renders popups and other map junk that isn't the tiles
   var htmlRendering = async function() {
     var rendered = await html2canvas(mapElement, {
       background: undefined,
@@ -71,12 +72,10 @@
       width: mapElement.offsetWidth,
       height: mapElement.offsetHeight
     });
-
-    // document.body.appendChild(rendered);
-    // rendered.setAttribute("style", "position: fixed; border: 1px solid red; top: 0; left: 0; z-index: 9999; opacity: .5");
-    ctx.drawImage(rendered, 0, 0, rendered.width, rendered.height);
+    context.drawImage(rendered, 0, 0, rendered.width, rendered.height);
   };
 
+  // renders the map tiles to the backing canvas
   var processScreenshot = async function(screenshot) {
     var base = new Image();
     base.src = screenshot.url;
@@ -84,21 +83,25 @@
     return new Promise(function(ok, fail) {
 
       base.onload = async function() {
-        ctx.drawImage(base, 0, 0, canvas.width, canvas.height);
+        context.drawImage(base, 0, 0, canvas.width, canvas.height);
         ok();
       }
     });
   };
 
+  // called to trigger the entire download rendering pipeline
   var downloadImage = async function() {
 
     canvas.width = mapElement.offsetWidth;
     canvas.height = mapElement.offsetHeight;
 
-    // hide map controls buttons
+    // hide map control and other UI
     mapElement.classList.add("screenshot");
 
-    // basemap
+    //TODO: temporarily freeze popups in place using left/top instead of transform
+    //html2canvas doesn't handle the transforms well
+
+    // render the basic tile map
     var snap = await scene.screenshot();
     await processScreenshot(snap);
 
@@ -118,6 +121,7 @@
     link.download = `st-map-${Date.now()}.png`;
     link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
 
+    // trigger download
     var click = new MouseEvent("click");
     link.dispatchEvent(click);
 
@@ -169,12 +173,14 @@
 
     scene.updateConfig(); // update config
 
+    // save config to do less work next time
     state.features = features;
   };
 
   $.one(".map-features").addEventListener("click", () => updateFeatures());
   map.on("zoomend", () => updateFeatures());
 
+  // add presets here to set new possible display sizes
   var sizePresets = {
     video: [1920, 1080],
     large: [1200, 700],
