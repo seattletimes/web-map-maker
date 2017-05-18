@@ -1,100 +1,67 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Web map maker</title>
-  <meta charset="utf-8" />
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
+  <meta charset="utf-8">
+  <title>Web Map Maker</title>
 
   <link rel="stylesheet" href="styles/leaflet.css">
   <link rel="stylesheet" href="styles/styles.css">
+  <!-- typekit fonts -->
+  <script>
+  (function(d) {
+  var config = {
+    kitId: 'rvq5yyp',
+    scriptTimeout: 3000
+  },
+  h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
+  })(document);
+  </script>
 </head>
 <body>
 
-  <!-- CONTENT GOES HERE -->
-  <div class="container" id="container">
-    <h1>Map Maker</h1>
-    <p class="description">This tool is for aproximate location only. Geocoders can mislocate addresses, so be sure to double-check that it's accurate. Map data is provided by Mapzen's API using OpenStreetMap. Source should read: "Mapzen, OpenStreetMap" <a href="http://www.openstreetmap.org/" target="_blank">Improve the map!</a></p>
-    <div id="popupContainer">
-      <input id="popupText" type="text" placeholder="Popup text" maxlength="40"><div id="geocodifier"></div>
-    </div>
+  <main class="vbox">
+    <nav class="toolbar">
+      <input class="popup-text" placeholder="Popup text">
+      <input class="address" placeholder="Address">
+      <select class="size-presets">
+        <option value="video">Video</option>
+        <option value="large">Featured media</option>
+        <option value="small">Locator</option>
+        <option value="twitter">Twitter card</option>
+      </select>
+      <div class="map-features">
+        <input class="feature-toggle" type="checkbox" id="terrain">
+        <label for="terrain">Terrain</label>
 
-    <div id="web_blank">
+        <input class="feature-toggle" type="checkbox" id="transit">
+        <label for="transit">Transit</label>
 
-      <div id="map_options">
-        <div class="map_option">
-          <div id="geocoder"></div>
-        </div>
-        <div class="map_option">
-          <form class="standalone-dropdown">
-            <fieldset>
-              <select onchange="sizeChange(this)" id="preset_sizes">
-                <option value="custom">Custom size</option>
-                <option value="video">Video</option>
-                <option value="web_large" selected>Web large</option>
-                <option value="web_small">Web small</option>
-                <option value="twitter">Twitter</option>
-                <option value="col1">1 column</option>
-                <option value="col2">2 column</option>
-                <option value="col3">3 column</option>
-                <option value="col4">4 column</option>
-              </select>
-            </fieldset>
-          </form>
-        </div>
+        <input class="feature-toggle" type="checkbox" id="buildings">
+        <label for="buildings">Buildings</label>
 
-        <div class="map_option">
-          <div class="btn-group">
-            <button class="btn gray active" onclick="showWeb();" id='web_btn'>Web</button>
-            <button class="btn gray" onclick="showPrint();" id='print_btn'>Print</button>
-          </div>
-
-          <button class="btn gray" onclick="showTerrain()" id='terrain_btn'>Terrain</button>
-          <button class="btn gray" onclick="showTransit()" id='transit_btn'>Transit</button>
-          <button class="btn gray" onclick="showBuildings()" id='buildings_btn'>Buildings</button>
-          <button class="btn gray" onclick="zoomFreeze()" id='zoom_lock'>Lock zoom</button>
-          <button class="btn gray" onclick="panFreeze()" id='pan_lock'>Lock pan</button>
-          <button class="btn gray active" onclick="showLabels()" id='auto_labels_btn'>Auto labels</button>
-          <input type="file" id="geo_files" name="files[]" accept=".geojson,.json" multiple>
-          <label for="geo_files" class="btn gray">Upload GeoJSON</label>
-        </div>
-
-
-
-        <p class='map-info'>Zoom: <span id="zoom_level"></span> <span id="warning_msg"></span></p>
-
-      </div>
-      <div id="map_area">
-        <div id="grid_holder">
-          <div id="map_ruler">
-            <div id="col_ruler"></div>
-            <div id="pixel_ruler"></div>
-          </div>
-        </div>
-        <div id="map_holder">
-
-          <div id="map"></div>
-
-          <button class='btn gray' onclick='downloadIMG();' id='download_img'>Image loading...<img src="images/preloader.gif" alt="Preloader" id="map_loader" /></button>
-          <div id="map_size"></div>
-        </div>
+        <input class="feature-toggle" type="checkbox" id="labels" checked="checked">
+        <label for="labels">Labels</label>
       </div>
 
+      <input class="file-uploader" type="file" id="file-uploader">
+      <label for="file-uploader">Load GeoJSON</label>
 
+      <button class="download">Download image</button>
+    </nav>
+
+    <div class="map-container">
+      <div class="map-frame">
+        <div class="map"></div>
+        <div class="dimensions"></div>
+        <div class="resize-handle"></div>
+      </div>
     </div>
-
-    <canvas id="canvas" width="1300" height="730"></canvas>
-
-    <div id="img-out"></div>
   </div>
 
   <!-- load all the JS -->
-
-
   <script src="js/leaflet.js"></script>
   <script src="js/tangram.min.js"></script>
   <script src="js/html2canvas0.5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
   <script src="js/loader.js" data-main="app"></script>
 
 
