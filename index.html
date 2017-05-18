@@ -1,156 +1,102 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Web map maker</title>
-    <meta charset="utf-8" />
-    <link rel="shortcut icon" type="image/x-icon" href="http://d1qqc1e9kvmdh8.cloudfront.net/img/favicon.ico">
+  <title>Web map maker</title>
+  <meta charset="utf-8" />
 
-    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/css/bootstrap.min.css" />
-    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/css/ngux-tophat-0.4.5.min.css" />
-    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/css/bootstrap-responsive.min.css" />
-    <link rel="stylesheet" type="text/css" href="http://d1qqc1e9kvmdh8.cloudfront.net/css/ngux-tophat-responsive-0.4.5.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.css">
 
-    <link rel="stylesheet" href="styles/leaflet.css">
-    <!-- <link rel="stylesheet" href="http://latimes-graphics-media.s3.amazonaws.com/styles/leaflet-extra.css" /> -->
-    <link rel="stylesheet" href="styles/jquery-ui.css">
-    <link rel="stylesheet" href="styles/bing-geocodifier.css">
-    <link rel="stylesheet" href="styles/styles.css">
-
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="js/bing-geocodifier.js"></script>
-
-    <script type="text/javascript" src="http://d1qqc1e9kvmdh8.cloudfront.net/bootstrap/2.3.2/js/bootstrap.min.js"></script>
-
-    <script src="http://d1qqc1e9kvmdh8.cloudfront.net/js/underscore-1.8.3-min.js"></script>
-    <script src="js/leaflet.js"></script>
-    <script src="js/tangram.min.js"></script>
-
-
-    <script src="js/html2canvas0.5.js"></script>
-
-    <script src="js/jquery-ui.js"></script>
-
-    <script type="text/javascript" src="http://cookbook.latimes.com/js/leaflet-bing-layer-0.0.1.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
-
-    <script type="text/javascript" src="js/config.js"></script>
-
+  <link rel="stylesheet" href="styles/leaflet.css">
+  <link rel="stylesheet" href="styles/styles.css">
 </head>
 <body>
-    <nav title="Navigation">
-        <div id="tophat-container">
-            <div id="tophat">
 
-                <span id="tophat-dropdown">
-                    <hr />
-                    <hr />
-                    <hr />
-                </span>
-
-                <a id="tophat-logo" href="http://www.latimes.com/"></a>
-            </div>
-        </div>
-    </nav>
-
-
-    <!-- CONTENT GOES HERE -->
-    <div class="container" id="container">
-        <h1>Map Maker</h1>
-        <p class="description">This tool is for aproximate location only. Geocoders can mislocate addresses, so be sure to double-check that it's accurate. Map data is provided by Mapzen's API using OpenStreetMap. Source should read: "Mapzen, OpenStreetMap" <a href="http://www.openstreetmap.org/" target="_blank">Improve the map!</a></p>
-        <div id="popupContainer">
-            <input id="popupText" type="text" placeholder="Popup text" maxlength="40"><div id="geocodifier"></div>
-        </div>
-
-        <div id="web_blank">
-
-            <div id="map_options">
-                <div class="map_option">
-                    <div id="geocoder"></div>
-                </div>
-                <div class="map_option">
-                    <form class="standalone-dropdown">
-                        <fieldset>
-                            <select onchange="sizeChange(this)" id="preset_sizes">
-                                <option value="custom">Custom size</option>
-                                <option value="video">Video</option>
-                                <option value="web_large" selected>Web large</option>
-                                <option value="web_small">Web small</option>
-                                <option value="twitter">Twitter</option>
-                                <option value="col1">1 column</option>
-                                <option value="col2">2 column</option>
-                                <option value="col3">3 column</option>
-                                <option value="col4">4 column</option>
-                            </select>
-                        </fieldset>
-                    </form>
-                </div>
-
-                <div class="map_option">
-                    <div class="btn-group">
-                        <button class="btn gray active" onclick="showWeb();" id='web_btn'>Web</button>
-                        <button class="btn gray" onclick="showPrint();" id='print_btn'>Print</button>
-                    </div>
-
-                    <button class="btn gray" onclick="showTerrain()" id='terrain_btn'>Terrain</button>
-                    <button class="btn gray" onclick="showTransit()" id='transit_btn'>Transit</button>
-                    <button class="btn gray" onclick="showBuildings()" id='buildings_btn'>Buildings</button>
-                    <button class="btn gray" onclick="zoomFreeze()" id='zoom_lock'>Lock zoom</button>
-                    <button class="btn gray" onclick="panFreeze()" id='pan_lock'>Lock pan</button>
-                    <button class="btn gray active" onclick="showLabels()" id='auto_labels_btn'>Auto labels</button>
-                    <input type="file" id="geo_files" name="files[]" accept=".geojson,.json" multiple>
-                    <label for="geo_files" class="btn gray">Upload GeoJSON</label>
-                </div>
-
-
-
-                <p class='map-info'>Zoom: <span id="zoom_level"></span> <span id="warning_msg"></span></p>
-
-            </div>
-            <div id="map_area">
-                <div id="grid_holder">
-                    <div id="map_ruler">
-                        <div id="col_ruler"></div>
-                        <div id="pixel_ruler"></div>
-                    </div>
-                </div>
-                <div id="map_holder">
-
-                    <div id="map"></div>
-
-                    <button class='btn gray' onclick='downloadIMG();' id='download_img'>Image loading...<img src="images/preloader.gif" alt="Preloader" id="map_loader" /></button>
-                    <div id="map_size"></div>
-                </div>
-            </div>
-
-
-        </div>
-
-        <canvas id="canvas" width="1300" height="730"></canvas>
-
-        <div id="img-out"></div>
+  <!-- CONTENT GOES HERE -->
+  <div class="container" id="container">
+    <h1>Map Maker</h1>
+    <p class="description">This tool is for aproximate location only. Geocoders can mislocate addresses, so be sure to double-check that it's accurate. Map data is provided by Mapzen's API using OpenStreetMap. Source should read: "Mapzen, OpenStreetMap" <a href="http://www.openstreetmap.org/" target="_blank">Improve the map!</a></p>
+    <div id="popupContainer">
+      <input id="popupText" type="text" placeholder="Popup text" maxlength="40"><div id="geocodifier"></div>
     </div>
 
+    <div id="web_blank">
 
-    <footer title="Footer">
-        <div id="footer-container">
-            <div id="footer">
-                <a id="footer-logo" href="http://www.latimes.com/"></a>
-
-                <div id="tos">
-                    <a href="http://www.tribpub.com/central-terms-of-service/">Terms of Service</a> |
-                    <a href="http://www.tribpub.com/privacy-policy-and-your-privacy-rights/">Privacy Policy</a> |
-                    <a href="http://www.latimes.com/lat-about-our-ads,0,3875412.htmlstory">About Our Ads</a> |
-                    <a href="http://www.latimes.com/services/site/la-reprint-request-splash,0,6731163.htmlstory">&copy; <script type="text/javascript">document.write(new Date().getFullYear())</script></a> |
-                    <a href="http://www.latimes.com/about/">About This Site</a>
-                </div>
-            </div>
+      <div id="map_options">
+        <div class="map_option">
+          <div id="geocoder"></div>
         </div>
-    </footer>
+        <div class="map_option">
+          <form class="standalone-dropdown">
+            <fieldset>
+              <select onchange="sizeChange(this)" id="preset_sizes">
+                <option value="custom">Custom size</option>
+                <option value="video">Video</option>
+                <option value="web_large" selected>Web large</option>
+                <option value="web_small">Web small</option>
+                <option value="twitter">Twitter</option>
+                <option value="col1">1 column</option>
+                <option value="col2">2 column</option>
+                <option value="col3">3 column</option>
+                <option value="col4">4 column</option>
+              </select>
+            </fieldset>
+          </form>
+        </div>
 
-    <!-- load all the JS -->
-    <script type="text/javascript" src="js/app.js"></script>
+        <div class="map_option">
+          <div class="btn-group">
+            <button class="btn gray active" onclick="showWeb();" id='web_btn'>Web</button>
+            <button class="btn gray" onclick="showPrint();" id='print_btn'>Print</button>
+          </div>
+
+          <button class="btn gray" onclick="showTerrain()" id='terrain_btn'>Terrain</button>
+          <button class="btn gray" onclick="showTransit()" id='transit_btn'>Transit</button>
+          <button class="btn gray" onclick="showBuildings()" id='buildings_btn'>Buildings</button>
+          <button class="btn gray" onclick="zoomFreeze()" id='zoom_lock'>Lock zoom</button>
+          <button class="btn gray" onclick="panFreeze()" id='pan_lock'>Lock pan</button>
+          <button class="btn gray active" onclick="showLabels()" id='auto_labels_btn'>Auto labels</button>
+          <input type="file" id="geo_files" name="files[]" accept=".geojson,.json" multiple>
+          <label for="geo_files" class="btn gray">Upload GeoJSON</label>
+        </div>
+
+
+
+        <p class='map-info'>Zoom: <span id="zoom_level"></span> <span id="warning_msg"></span></p>
+
+      </div>
+      <div id="map_area">
+        <div id="grid_holder">
+          <div id="map_ruler">
+            <div id="col_ruler"></div>
+            <div id="pixel_ruler"></div>
+          </div>
+        </div>
+        <div id="map_holder">
+
+          <div id="map"></div>
+
+          <button class='btn gray' onclick='downloadIMG();' id='download_img'>Image loading...<img src="images/preloader.gif" alt="Preloader" id="map_loader" /></button>
+          <div id="map_size"></div>
+        </div>
+      </div>
+
+
+    </div>
+
+    <canvas id="canvas" width="1300" height="730"></canvas>
+
+    <div id="img-out"></div>
+  </div>
+
+  <!-- load all the JS -->
+
+
+  <script src="js/leaflet.js"></script>
+  <script src="js/tangram.min.js"></script>
+  <script src="js/html2canvas0.5.js"></script>
+  <script src="http://cookbook.latimes.com/js/leaflet-bing-layer-0.0.1.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-geocoder-mapzen/1.4.1/leaflet-geocoder-mapzen.js"></script>
+  <script src="js/loader.js" data-main="app"></script>
 
 
 </body>

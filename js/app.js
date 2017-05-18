@@ -1,3 +1,8 @@
+(async function() {
+
+    var qsa = await install("qsa");
+    console.log(qsa);
+
 
 // check if config options are done
 if (typeof configOptions !== 'undefined') {
@@ -755,3 +760,5 @@ scene.subscribe({
         console.log('scene warning:', e);
     }
 });
+
+})();
