@@ -50,16 +50,15 @@
     return new Promise(function(ok, fail) {
       img.onload = function() {
         // be sure to offset it
-        var svg1 = document.querySelector("svg");
-        var box = svg1.getAttribute("viewBox");
+        var box = element.getAttribute("viewBox");
         var svgOffset = box.split(/\s+|,/).map(Number);
 
-        var svgBounds = svg.getBoundingClientRect();
+        var svgBounds = element.getBoundingClientRect();
         var srcCoords = {
           x: svgOffset[0] * -1 - (svgBounds.width - mapElement.offsetWidth) / 2,
           y: svgOffset[1] *-1 - (svgBounds.height - mapElement.offsetHeight) / 2
-        }
-        ctx.drawImage(img, svgCoords.width, svgCoords.height, svgBounds.width, svgBounds.height);
+        };
+        ctx.drawImage(img, srcCoords.x, srcCoords.y, svgBounds.width, svgBounds.height);
         ok();
       };
       img.src = url;
@@ -107,7 +106,7 @@
     map.setZoom(map.getZoom() - 0.5);
     map.setZoom(map.getZoom() + 0.5);
 
-    var svgRendering = $("#map svg").length ? drawSVG($.one("svg")) : Promise.resolve();
+    var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
     await svgRendering;
     await htmlRendering;
 
@@ -195,7 +194,7 @@
   geoStyles.MultiPolygon = geoStyles.Polygon;
   geoStyles.MultiLineString = geoStyles.LineString;
 
-  var handleFileSelect = function(evt) {
+  var onFileSelect = function(evt) {
     // add multiple files to the map
     for (var i = 0; i <  evt.target.files.length; i++) {
 
@@ -206,7 +205,7 @@
 
         var contents = e.target.result;
         // turn string into json object
-        var parsedJSON = jQuery.parseJSON(contents);
+        var parsedJSON = JSON.parse(contents);
 
         // add GeoJSON to map
         L.geoJson(parsedJSON, {
@@ -219,5 +218,7 @@
       r.readAsText(f);
     }
   };
+
+  $.one(".file-uploader").addEventListener("change", onFileSelect);
 
 })();
