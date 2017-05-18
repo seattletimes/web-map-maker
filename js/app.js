@@ -1,15 +1,18 @@
 (async function() {
 
+  //required
   var [$, geocoder, util] = await install.batch("qsa", "geolocation", "util");
+  //other modules
+  install.batch("resizer");
 
   var state = {
-    buildingsVisible: false,
-    terrainVisible: false,
-    transitVisible: false,
-    labelsVisible: false,
-    frozenZoom: false
+    features: {},
+    dimensions: {
+      width: 800,
+      height: 600
+    }
   };
-  var canvas = $.one("canvas");
+  var canvas = document.createElement("canvas");
   var ctx = canvas.getContext("2d");
 
   // Get window width
@@ -21,48 +24,9 @@
   var userOptions = {};
   var mapSlug = "st-mapmaker-";
 
-  // build the map's ruler
-  var createGrid = function(size) {
-    // magic number: why 1600?
-    var ratioW = 1600/size,
-    ratioH = 1600/size;
-
-    var parent = $("<div />", {
-      class: "grid",
-      width: ratioW  * size,
-      height: ratioH  * size
-    }).addClass("grid" + " grid" +size).appendTo("#grid_holder");
-
-    for (var i = 0; i < ratioH; i++) {
-      for(var p = 0; p < ratioW; p++){
-        $("<div />", {
-          width: size - 1,
-          height: size - 1
-        }).appendTo(parent);
-      }
-    }
-  };
-
-  // magic number: why 1500 here? What does that mean?
-  var printRuler = $.one("#col_ruler");
-  var pixelRuler = $.one("#pixel_ruler");
-  for (var i = 0; i < 1500; i+=10) {
-    // checks if fits for print or web columns
-    if (i % 330 === 0) {
-      printRuler.innerHTML += `<span class="px_measure">${i/330} col</span>`
-    } else if (i % 100 === 0 && i <= 1400) {
-      pixelRuler.innerHTML += `<span class="px_measure">${i-100} px</span>`;
-    }
-  }
-
-  // TODO: refactor grid stuff
-  // createGrid(50);
-  // createGrid(100);
-  // createGrid(330);
-
-  var map = L.map("map", {
+  var map = L.map($.one(".map"), {
     attributionControl: true,
-    center: [42, -120],
+    center: [47.5, -122],
     zoom: 10,
     detectRetina: true,
     minZoom: 1.5,
@@ -88,15 +52,6 @@
   map.on("zoomend", function() {
 
     var zoomRounded = Math.floor(map.getZoom()*10) / 10;
-
-    // warning for too close of a zoom
-    if (zoomRounded >= 16) {
-      $.one("#warning_msg").innerHTML = "WARNING: The map is zoomed in very close. Are major roads or freeways visible for reference?";
-    } else {
-      $.one("#warning_msg").innerHTML = "";
-    }
-
-    $.one("#zoom_level").innerHTML = zoomRounded.toFixed(1);
 
     //TODO: Not wild about these nested conditionals
     // buildings out under 14 zoom
@@ -125,7 +80,7 @@
 
   // function to fire after map's parent is resized
 
-  $("#map_holder").resize(function(){
+  if (false) $("#map_holder").resize(function(){
     // get map's size
     var mapHeight = $("#map").height(),
     mapWidth = $("#map").width()
@@ -150,38 +105,6 @@
     // add mo' map
     setTimeout(() => map.invalidateSize({ pan: false }), 400);
   });
-
-
-  var handleMouseMove = function(event) {
-    var dot, eventDoc, doc, body, pageX, pageY;
-
-    event = event || window.event; // IE-ism
-
-    var pixel = {
-      x: event.clientX - $map.offset().left,
-      y: event.clientY - $map.offset().top + $(window).scrollTop()
-    };
-    scene.getFeatureAt(pixel).then(function(selection) {
-      // console.log(pixel);
-      if (!selection) {
-        return;
-      }
-      var feature = selection.feature;
-      if (feature !== null) {
-        if (feature.properties !== null) {
-          // console.log(feature);
-
-          if (feature.properties.kind == "highway"){
-              // console.log(feature.properties.ref);
-          } else {
-            // console.log(feature.properties.name);
-          }
-        }
-      }
-    });
-  };
-
-  scene.container.addEventListener("mousemove", handleMouseMove);
 
   var drawSVG = async function(element) {
     var svgString = new XMLSerializer().serializeToString(element);
@@ -528,17 +451,6 @@
     $(".leaflet-control-attribution").show();
   }
 
-  // Apple's Magic Mouse is a little finicky--prevent scroll when mouse is down on map
-  $("#map").mousedown(function() {
-    map.scrollWheelZoom.disable();
-  });
-  $("#map").mouseup(function() {
-    if (!frozenZoom) {
-      map.scrollWheelZoom.enable();
-    }
-  });
-
-
   // styles for geojson pulled from v1.0
   var lineStyle = {color:"#cd7139",weight: 4,opacity: 1, lineJoin:"round"};
   var polyStyle = {color: "#000",weight: 2,opacity: 0.65,fillOpacity: 0, lineJoin:"round"};
@@ -579,17 +491,15 @@
     }
   };
 
-  $.one("#geo_files").addEventListener("change", handleFileSelect);
-
   var mapLoadAction = true;
 
   // show that map is still loading
   function mapLoading() {
-    if (scene.tile_manager.isLoadingVisibleTiles()) {
-      $("#download_img").html(`Image loading...<img src="images/preloader.gif" alt="Preloader" id="map_loader" />`);
-      $("#download_img").addClass("gray");
-      mapLoadAction = true;
-    }
+    // if (scene.tile_manager.isLoadingVisibleTiles()) {
+    //   $("#download_img").html(`Image loading...<img src="images/preloader.gif" alt="Preloader" id="map_loader" />`);
+    //   $("#download_img").addClass("gray");
+    //   mapLoadAction = true;
+    // }
   }
 
   // listen for anything causing a possible map update
@@ -602,8 +512,8 @@
   // fire when map is down loading
   scene.subscribe({
     view_complete: function () {
-      $("#download_img").html("Download image");
-      $("#download_img").removeClass("gray");
+      // $("#download_img").html("Download image");
+      // $("#download_img").removeClass("gray");
       mapLoadAction = false;
     },
     error: function (e) {
