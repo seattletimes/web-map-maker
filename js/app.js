@@ -186,51 +186,6 @@
   };
   sizeSelect.addEventListener("change", onPresetChoice);
 
-  function showPrint() {
-    // swap to print color
-    scene.config.global.road_color = "#98a5ac";
-
-    // bump up size of major roads
-    scene.config.layers.roads.major_road.draw.lines.width[3][1] = "1.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[4][1] = "2.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[5][1] = "3.5px";
-    scene.config.layers.roads.major_road.draw.lines.width[6][1] = "10m";
-
-    // bump up size of minor roads
-    scene.config.layers.roads.minor_road.draw.lines.width[1][1] = "0.5px";
-    scene.config.layers.roads.minor_road.draw.lines.width[2][1] = "0.5px";
-
-    // make water darker
-    scene.config.global.water_color = "#a6bcd3";
-
-    // turn off labels
-    labelsVisible = true;
-    showLabels();
-
-    scene.updateConfig(); // update config
-
-    // update buttons
-    $("#print_btn").addClass("active");
-    $("#web_btn").removeClass("active");
-
-    // hide attribution
-    $(".leaflet-control-attribution").hide();
-
-  }
-
-  function showWeb() {
-    scene.load("map-styles.yaml");
-    buildingsVisible = false;
-    // update buttons
-    $("#print_btn").removeClass("active");
-    $("#web_btn").addClass("active");
-    $("#auto_labels_btn").addClass("active");
-    labelsVisible = true;
-
-    // bring back attribution
-    $(".leaflet-control-attribution").show();
-  }
-
   // styles for geojson pulled from v1.0
   var geoStyles = {
     LineString: { color:"#cd7139", weight: 4, opacity: 1, lineJoin:"round" },
