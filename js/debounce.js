@@ -4,7 +4,7 @@ install.patch(function() {
     var timeout = null;
     return function(...args) {
       if (timeout) clearTimeout(timeout);
-      timeout = setTimeout(() => f.apply(null, args), t);
+      timeout = setTimeout(() => f(...args), t);
     };
   }
 

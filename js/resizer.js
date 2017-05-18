@@ -13,16 +13,7 @@ install.patch(async function() {
     document.body.addEventListener("mouseup", onHandleUp);
   };
 
-  var onMove = function(e) {
-    if (e && e.clientX) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      var bounds = frame.getBoundingClientRect();
-      var width = e.clientX - bounds.left;
-      var height = e.clientY - bounds.top;
-      frame.style.width = `${width}px`;
-      frame.style.height = `${height}px`;
-    }
+  var updateSize = function() {
     //get actual rendered size
     width = frame.offsetWidth;
     height = frame.offsetHeight;
@@ -31,14 +22,33 @@ install.patch(async function() {
     frame.dispatchEvent(event);
   };
 
+  var onMove = function(e) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    var bounds = frame.getBoundingClientRect();
+    var width = e.clientX - bounds.left;
+    var height = e.clientY - bounds.top;
+    frame.style.width = `${width}px`;
+    frame.style.height = `${height}px`;
+    updateSize();
+  };
+
   var onHandleUp = function() {
     document.body.removeEventListener("mousemove", onMove);
     document.body.removeEventListener("mouseup", onHandleUp);
   };
 
   handle.addEventListener("mousedown", onHandleDown);
-  window.addEventListener("resize", onMove);
+  window.addEventListener("resize", updateSize);
 
-  onMove();
+  updateSize();
+
+  return {
+    resize: function(width, height) {
+      frame.style.width = `${width}px`;
+      frame.style.height = `${height}px`;
+      updateSize();
+    }
+  }
 
 });

@@ -1,9 +1,8 @@
 (async function() {
 
-  //other modules
-  install.batch("resizer");
   //required here
-  var [$, geocoder, util, debounce] = await install.batch("qsa", "geolocation", "util", "debounce");
+  var modules = install.batch("qsa", "geolocation", "util", "debounce", "resizer");
+  var [$, geocoder, util, debounce, resizer] = await modules;
 
   var state = {
     features: {},
@@ -171,6 +170,21 @@
 
   $.one(".map-features").addEventListener("click", () => updateFeatures());
   map.on("zoomend", () => updateFeatures());
+
+  var sizePresets = {
+    video: [1920, 1080],
+    large: [1200, 700],
+    small: [640, 480],
+    twitter: [800, 400]
+  };
+
+  var sizeSelect = $.one(".size-presets");
+
+  var onPresetChoice = function() {
+    var preset = sizePresets[sizeSelect.value];
+    resizer.resize(...preset);
+  };
+  sizeSelect.addEventListener("change", onPresetChoice);
 
   function showPrint() {
     // swap to print color
