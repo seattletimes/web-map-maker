@@ -40,7 +40,6 @@
   frame.addEventListener("resize", debounce(scheduleInvalidation));
 
   var drawSVG = async function(element) {
-    console.log(element);
     var svgString = new XMLSerializer().serializeToString(element);
     var DOMURL = self.URL || self.webkitURL || self;
     var img = new Image();
@@ -65,13 +64,17 @@
     });
   };
 
-  var htmlRendering = function() {
-    return new Promise(function(ok, fail) {
-      html2canvas(mapElement, { onrendered: function(rendered) {
-        ctx.drawImage(rendered, 0, 0, mapElement.width, mapElement.height);
-        ok();
-      }})
+  var htmlRendering = async function() {
+    var rendered = await html2canvas(mapElement, {
+      background: undefined,
+      logging: true,
+      width: mapElement.offsetWidth,
+      height: mapElement.offsetHeight
     });
+
+    // document.body.appendChild(rendered);
+    // rendered.setAttribute("style", "position: fixed; border: 1px solid red; top: 0; left: 0; z-index: 9999; opacity: .5");
+    ctx.drawImage(rendered, 0, 0, rendered.width, rendered.height);
   };
 
   var processScreenshot = async function(screenshot) {
@@ -108,7 +111,7 @@
 
     var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
     await svgRendering;
-    await htmlRendering;
+    await htmlRendering();
 
     // create an off-screen anchor tag
     var link = document.createElement("a");
@@ -117,6 +120,8 @@
 
     var click = new MouseEvent("click");
     link.dispatchEvent(click);
+
+    mapElement.classList.remove("screenshot");
   };
 
   $.one(".download").addEventListener("click", downloadImage);

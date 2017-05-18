@@ -105,6 +105,9 @@ main {
   right: 0;
   bottom: 0;
   box-shadow: 0 16px 24px -8px rgba(0, 0, 0, .2);
+  background: transparent;
+  /* can't use vars here because of html2canvas */
+  font-family: "ff-dagny-web-pro", Helvetica Neue, Helvetica, sans-serif; 
 }
 
 .map-frame .resize-handle {
@@ -116,4 +119,13 @@ main {
   height: 12px;
   background: gray;
   border-radius: 100%;
+}
+
+.screenshot .leaflet-control-zoom,
+.screenshot .leaflet-popup-close-button {
+  display: none !important;
+}
+
+.screenshot .map {
+  background: transparent !important;
 }
