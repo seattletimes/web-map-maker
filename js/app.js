@@ -31,6 +31,7 @@
   vectorLayer.addTo(map);
   var scene = vectorLayer.scene;
 
+  //Hook up the download button to the pertinent map layers
   $.one(".download").addEventListener("click", () => renderer.downloadImage(map, scene, popupLayer));
 
   //call this to let the map know that its dimensions have changed
@@ -53,16 +54,20 @@
     resizer.resize(...preset);
   };
   sizeSelect.addEventListener("change", onPresetChoice);
+
+  //we also let the map know when the frame is resized
   frame.addEventListener("resize", debounce(function(e) {
     var custom = true;
     var { width, height } = e.detail;
-    for ([w, h] of Object.values(sizePresets)) {
+    //check new size against presets, otherwise it's "custom"
+    for (var [w, h] of Object.values(sizePresets)) {
       if (w == width && h == height) custom = false;
     }
     if (custom) sizeSelect.value = "custom";
     scheduleInvalidation();
   }));
 
+  //set various map features -- needs trimming
   var updateFeatures = function(overrides = {}) {
     //collect checkbox state
     var features = {};
@@ -106,10 +111,11 @@
 
     scene.updateConfig(); // update config
 
-    // save config to do less work next time
+    // save config to do less work next time, hopefully
     state.features = features;
   };
 
+  // override some features, probably should be fixed in YAML
   var forceFeatures = {
     transit: false
   };
