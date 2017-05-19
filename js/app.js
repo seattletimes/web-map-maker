@@ -39,7 +39,30 @@
     setTimeout(() => map.invalidateSize());
   };
 
-  frame.addEventListener("resize", debounce(scheduleInvalidation));
+  // add presets here to set new possible display sizes
+  var sizePresets = {
+    video: [1920, 1080],
+    large: [1200, 700],
+    small: [640, 480],
+    twitter: [800, 400]
+  };
+
+  var sizeSelect = $.one(".size-presets");
+
+  var onPresetChoice = function() {
+    var preset = sizePresets[sizeSelect.value];
+    resizer.resize(...preset);
+  };
+  sizeSelect.addEventListener("change", onPresetChoice);
+  frame.addEventListener("resize", debounce(function(e) {
+    var custom = true;
+    var { width, height } = e.detail;
+    for ([w, h] of Object.values(sizePresets)) {
+      if (w == width && h == height) custom = false;
+    }
+    if (custom) sizeSelect.value = "custom";
+    scheduleInvalidation();
+  }));
 
   // renders SVG to a canvas (for GeoJSON layers, mostly)
   var drawSVG = async function(element) {
@@ -199,22 +222,6 @@
 
   $.one(".map-features").addEventListener("click", () => updateFeatures(forceFeatures));
   map.on("zoomend", () => updateFeatures(forceFeatures));
-
-  // add presets here to set new possible display sizes
-  var sizePresets = {
-    video: [1920, 1080],
-    large: [1200, 700],
-    small: [640, 480],
-    twitter: [800, 400]
-  };
-
-  var sizeSelect = $.one(".size-presets");
-
-  var onPresetChoice = function() {
-    var preset = sizePresets[sizeSelect.value];
-    resizer.resize(...preset);
-  };
-  sizeSelect.addEventListener("change", onPresetChoice);
 
   // styles for geojson pulled from v1.0
   var geoStyles = {
