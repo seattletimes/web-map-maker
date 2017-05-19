@@ -25,6 +25,9 @@
     closePopupOnClick: false
   });
 
+  var popupLayer = L.featureGroup();
+  popupLayer.addTo(map);
+
   map.attributionControl.setPrefix("Mapzen, OpenStreetMap");
 
   var vectorLayer = Tangram.leafletLayer({ scene: "map-styles.yaml" });
@@ -92,14 +95,12 @@
   // called to trigger the entire download rendering pipeline
   var downloadImage = async function() {
 
+    // clear and resize the screenshot buffer
     canvas.width = mapElement.offsetWidth;
     canvas.height = mapElement.offsetHeight;
 
     // hide map control and other UI
     mapElement.classList.add("screenshot");
-
-    //TODO: temporarily freeze popups in place using left/top instead of transform
-    //html2canvas doesn't handle the transforms well
 
     // render the basic tile map
     var snap = await scene.screenshot();
@@ -112,9 +113,26 @@
     map.setZoom(map.getZoom() - 0.5);
     map.setZoom(map.getZoom() + 0.5);
 
+    // render SVG elements to the buffer (mostly GeoJSON)
     var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
     await svgRendering;
+
+    // temporarily freeze popups in place using left/top instead of transform
+    // html2canvas doesn't handle the transforms well
+    var origin = mapElement.getBoundingClientRect();
+    var frozen = popupLayer.getLayers().map(function(popup) {
+      var element = popup._container;
+      var bounds = element.getBoundingClientRect();
+      var style = element.getAttribute("style");
+      element.setAttribute("style", `opacity: 1; position: absolute; top: ${bounds.top - origin.top}px; left: ${bounds.left - origin.left}px;`);
+      return { element, style }
+    });
+
+    // render HTML elements to the buffer
     await htmlRendering();
+
+    mapElement.classList.remove("screenshot");
+    frozen.forEach(ice => ice.element.setAttribute("style", ice.style));
 
     // create an off-screen anchor tag
     var link = document.createElement("a");
@@ -124,8 +142,6 @@
     // trigger download
     var click = new MouseEvent("click");
     link.dispatchEvent(click);
-
-    mapElement.classList.remove("screenshot");
   };
 
   $.one(".download").addEventListener("click", downloadImage);
@@ -235,5 +251,31 @@
   };
 
   $.one(".file-uploader").addEventListener("change", onFileSelect);
+
+  //handle the popup stuff
+  var popupInput = $.one(".popup-text");
+  var addressInput = $.one(".address");
+  var geocodeButton = $.one(".add-from-geocode");
+
+  var addFromGeocode = async function() {
+    var text = popupInput.value;
+    var address = addressInput.value;
+    if (!text || !address) return;
+    var coords = await geocoder.address(address);
+    
+    var popup = L.popup();
+    popup.setLatLng(coords);
+    popup.setContent(text);
+    popup.addTo(popupLayer);
+    map.flyTo(coords);
+  };
+
+  geocodeButton.addEventListener("click", addFromGeocode);
+
+  var watchPopupInputs = function(e) {
+    if (e.keyCode == 13) addFromGeocode();
+  };
+
+  [popupInput, addressInput].forEach(el => el.addEventListener("keyup", watchPopupInputs));
 
 })();

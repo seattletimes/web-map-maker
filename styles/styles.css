@@ -35,6 +35,11 @@ main {
   display: block;
 }
 
+.toolbar .popup-config button {
+  width: 100%;
+  margin-top: 4px;
+}
+
 .toolbar .map-features input:first-child + label {
   border-radius: 4px 0 0 4px;
 }
@@ -51,6 +56,12 @@ main {
   display: block;
   border: 1px solid #EEE;
   padding: 4px 8px;
+  transition: all .2s linear;
+}
+
+.toolbar input[type="checkbox"] + label:hover,
+.toolbar input[type="checkbox"] + label:focus {
+  background: #F8F8F8;
 }
 
 .toolbar input[type="checkbox"]:checked + label {
@@ -67,6 +78,13 @@ main {
   background: white;
   border-radius: 4px;
   padding: 4px 8px;
+  transition: all .2s linear;
+}
+
+.toolbar button:hover,
+.toolbar button:focus {
+  background: #F8F8F8;
+  box-shadow: 0 8px 8px -4px rgba(0, 0, 0, .1);
 }
 
 .map-container {
