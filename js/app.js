@@ -1,16 +1,13 @@
 (async function() {
 
   //required here
-  var modules = install.batch("qsa", "geolocation", "util", "debounce", "resizer");
-  var [$, geocoder, util, debounce, resizer] = await modules;
+  var modules = install.batch("qsa", "geolocation", "util", "debounce", "resizer", "screenshot");
+  var [$, geocoder, util, debounce, resizer, renderer] = await modules;
 
   // state is a grab-bag of settings, used instead of random globals
   var state = {
     features: {}
   };
-  // canvas used for drawing the downloaded image
-  var canvas = document.createElement("canvas");
-  var context = canvas.getContext("2d");
 
   var frame = $.one(".map-frame");
   var mapElement = $.one(".map");
@@ -34,118 +31,43 @@
   vectorLayer.addTo(map);
   var scene = vectorLayer.scene;
 
+  //Hook up the download button to the pertinent map layers
+  $.one(".download").addEventListener("click", () => renderer.downloadImage(map, scene, popupLayer));
+
   //call this to let the map know that its dimensions have changed
   var scheduleInvalidation = function() {
     setTimeout(() => map.invalidateSize());
   };
 
-  frame.addEventListener("resize", debounce(scheduleInvalidation));
-
-  // renders SVG to a canvas (for GeoJSON layers, mostly)
-  var drawSVG = async function(element) {
-    var svgString = new XMLSerializer().serializeToString(element);
-    var DOMURL = self.URL || self.webkitURL || self;
-    var img = new Image();
-    var svg = new Blob([svgString], {type: "image/svg+xml;charset=utf-8"});
-    var url = DOMURL.createObjectURL(svg);
-
-    return new Promise(function(ok, fail) {
-      img.onload = function() {
-        // be sure to offset it
-        var box = element.getAttribute("viewBox");
-        var svgOffset = box.split(/\s+|,/).map(Number);
-
-        var svgBounds = element.getBoundingClientRect();
-        var srcCoords = {
-          x: svgOffset[0] * -1 - (svgBounds.width - mapElement.offsetWidth) / 2,
-          y: svgOffset[1] *-1 - (svgBounds.height - mapElement.offsetHeight) / 2
-        };
-        context.drawImage(img, srcCoords.x, srcCoords.y, svgBounds.width, svgBounds.height);
-        ok();
-      };
-      img.src = url;
-    });
+  // add presets here to set new possible display sizes
+  var sizePresets = {
+    video: [1920, 1080],
+    large: [1200, 700],
+    small: [640, 480],
+    twitter: [800, 400]
   };
 
-  // renders popups and other map junk that isn't the tiles
-  var htmlRendering = async function() {
-    var rendered = await html2canvas(mapElement, {
-      background: undefined,
-      logging: true,
-      width: mapElement.offsetWidth,
-      height: mapElement.offsetHeight
-    });
-    context.drawImage(rendered, 0, 0, rendered.width, rendered.height);
+  var sizeSelect = $.one(".size-presets");
+
+  var onPresetChoice = function() {
+    var preset = sizePresets[sizeSelect.value];
+    resizer.resize(...preset);
   };
+  sizeSelect.addEventListener("change", onPresetChoice);
 
-  // renders the map tiles to the backing canvas
-  var processScreenshot = async function(screenshot) {
-    var base = new Image();
-    base.src = screenshot.url;
+  //we also let the map know when the frame is resized
+  frame.addEventListener("resize", debounce(function(e) {
+    var custom = true;
+    var { width, height } = e.detail;
+    //check new size against presets, otherwise it's "custom"
+    for (var [w, h] of Object.values(sizePresets)) {
+      if (w == width && h == height) custom = false;
+    }
+    if (custom) sizeSelect.value = "custom";
+    scheduleInvalidation();
+  }));
 
-    return new Promise(function(ok, fail) {
-
-      base.onload = async function() {
-        context.drawImage(base, 0, 0, canvas.width, canvas.height);
-        ok();
-      }
-    });
-  };
-
-  // called to trigger the entire download rendering pipeline
-  var downloadImage = async function() {
-
-    // clear and resize the screenshot buffer
-    canvas.width = mapElement.offsetWidth;
-    canvas.height = mapElement.offsetHeight;
-
-    // hide map control and other UI
-    mapElement.classList.add("screenshot");
-
-    // render the basic tile map
-    var snap = await scene.screenshot();
-    await processScreenshot(snap);
-
-    // Super hacky solution to SVG drawing problem: change zoom level then put it back
-    // This is here to patch a bug where a small pan of the map will result in
-    // geojson/svg objects being cut off in the downloaded image
-    // Someday we might have a real solution to the problem but until then ¯\_(ツ)_/¯
-    map.setZoom(map.getZoom() - 0.5);
-    map.setZoom(map.getZoom() + 0.5);
-
-    // render SVG elements to the buffer (mostly GeoJSON)
-    var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
-    await svgRendering;
-
-    // temporarily freeze popups in place using left/top instead of transform
-    // html2canvas doesn't handle the transforms well
-    var origin = mapElement.getBoundingClientRect();
-    var frozen = popupLayer.getLayers().map(function(popup) {
-      var element = popup._container;
-      var bounds = element.getBoundingClientRect();
-      var style = element.getAttribute("style");
-      element.setAttribute("style", `opacity: 1; position: absolute; top: ${bounds.top - origin.top}px; left: ${bounds.left - origin.left}px;`);
-      return { element, style }
-    });
-
-    // render HTML elements to the buffer
-    await htmlRendering();
-
-    mapElement.classList.remove("screenshot");
-    frozen.forEach(ice => ice.element.setAttribute("style", ice.style));
-
-    // create an off-screen anchor tag
-    var link = document.createElement("a");
-    link.download = `st-map-${Date.now()}.png`;
-    link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-
-    // trigger download
-    var click = new MouseEvent("click");
-    link.dispatchEvent(click);
-  };
-
-  $.one(".download").addEventListener("click", downloadImage);
-
+  //set various map features -- needs trimming
   var updateFeatures = function(overrides = {}) {
     //collect checkbox state
     var features = {};
@@ -189,32 +111,17 @@
 
     scene.updateConfig(); // update config
 
-    // save config to do less work next time
+    // save config to do less work next time, hopefully
     state.features = features;
   };
 
+  // override some features, probably should be fixed in YAML
   var forceFeatures = {
     transit: false
   };
 
   $.one(".map-features").addEventListener("click", () => updateFeatures(forceFeatures));
   map.on("zoomend", () => updateFeatures(forceFeatures));
-
-  // add presets here to set new possible display sizes
-  var sizePresets = {
-    video: [1920, 1080],
-    large: [1200, 700],
-    small: [640, 480],
-    twitter: [800, 400]
-  };
-
-  var sizeSelect = $.one(".size-presets");
-
-  var onPresetChoice = function() {
-    var preset = sizePresets[sizeSelect.value];
-    resizer.resize(...preset);
-  };
-  sizeSelect.addEventListener("change", onPresetChoice);
 
   // styles for geojson pulled from v1.0
   var geoStyles = {
