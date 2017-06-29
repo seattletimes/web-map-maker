@@ -83,7 +83,7 @@
     if (zoom < 11) {
       features.transit = false;
     }
-    
+
     // terrain visibility
     if (state.features.terrain != features.terrain) {
       scene.config.layers.earth.draw.polygons.visible = !features.terrain;
@@ -169,7 +169,7 @@
     var address = addressInput.value;
     if (!text || !address) return;
     var coords = await geocoder.address(address);
-    
+
     var popup = L.popup();
     popup.setLatLng(coords);
     popup.setContent(text);
@@ -182,6 +182,15 @@
   var watchPopupInputs = function(e) {
     if (e.keyCode == 13) addFromGeocode();
   };
+
+  // adding popup on click
+  function onClick(e){
+    var pop = L.popup();
+    pop.setLatLng(e.latlng);
+    pop.setContent(prompt("Provide text"));
+    pop.addTo(popupLayer);
+  }
+  map.on("click", onClick);
 
   [popupInput, addressInput].forEach(el => el.addEventListener("keyup", watchPopupInputs));
 
