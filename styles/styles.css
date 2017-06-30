@@ -125,7 +125,7 @@ main {
   box-shadow: 0 16px 24px -8px rgba(0, 0, 0, .2);
   background: transparent;
   /* can't use vars here because of html2canvas */
-  font-family: "ff-dagny-web-pro", Helvetica Neue, Helvetica, sans-serif; 
+  font-family: "ff-dagny-web-pro", Helvetica Neue, Helvetica, sans-serif;
 }
 
 .map-frame .resize-handle {
@@ -146,4 +146,31 @@ main {
 
 .screenshot .map {
   background: transparent !important;
+}
+
+.leaflet-popup-close-button {
+  display: none;
+}
+
+.leaflet-popup:hover .leaflet-popup-close-button {
+  display: block;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 0;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: sans-serif;
+
+}
+
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  outline: black solid 1px;
+}
+
+.leaflet-popup-content {
+    margin: 5px 5px;
+    line-height: 1.2;
+    max-width: 100px;
+    word-wrap: normal;
 }
