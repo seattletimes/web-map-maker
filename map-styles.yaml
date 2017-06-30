@@ -610,7 +610,7 @@ layers:
                 draw:
                     text:
                         text_source: name
-                        offset: [0px, -14px]
+                        offset: [0px, -9px]
                         order: function() { return feature.sort_rank; }
                         repeat_distance: 200px
                         priority: 3
@@ -628,7 +628,7 @@ layers:
                 draw:
                     text:
                         text_source: name
-                        offset: [0px, -14px]
+                        offset: [0px, -9px]
                         priority: 5
                         order: function() { return feature.sort_rank; }
                         font:
