@@ -188,7 +188,8 @@
     var pop = L.popup();
     pop.setLatLng(e.latlng);
     pop.setContent(prompt("Provide text"));
-    pop.addTo(popupLayer);
+    var text = pop.getContent();
+    if (text.length > 0)  pop.addTo(popupLayer);
   }
   map.on("click", onClick);
 
