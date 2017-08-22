@@ -1,3 +1,5 @@
+window.DEBUG = window.location.search.indexOf("debug") > -1;
+
 (async function() {
 
   //required here

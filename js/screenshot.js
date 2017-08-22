@@ -101,13 +101,17 @@ install.patch(async function() {
     frozen.forEach(ice => ice.element.setAttribute("style", ice.style));
 
     // create an off-screen anchor tag
-    var link = document.createElement("a");
-    link.download = `st-map-${Date.now()}.png`;
-    link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+    if (window.DEBUG) {
+      window.open(canvas.toDataURL("image/png"));
+    } else {
+      var link = document.createElement("a");
+      link.download = `st-map-${Date.now()}.png`;
+      link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
 
-    // trigger download
-    var click = new MouseEvent("click");
-    link.dispatchEvent(click);
+      // trigger download
+      var click = new MouseEvent("click");
+      link.dispatchEvent(click);
+    }
   };
 
   return { downloadImage };

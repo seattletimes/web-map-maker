@@ -164,8 +164,8 @@ main {
 
 }
 
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  outline: black solid 1px;
+.leaflet-popup-content-wrapper {
+  border-bottom: black solid 1px;
 }
 
 .leaflet-popup-content {
@@ -173,4 +173,17 @@ main {
     line-height: 1.2;
     max-width: 100px;
     word-wrap: normal;
+    z-index: 999;
+}
+
+.leaflet-popup-tip-container {
+  overflow: visible;
+  z-index: -1;
+}
+
+.leaflet-popup-tip {
+  background: black;
+  width: 10px;
+  height: 16px;
+  padding: 0px;
 }
