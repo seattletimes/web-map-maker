@@ -27,7 +27,7 @@ window.DEBUG = window.location.search.indexOf("debug") > -1;
   var popupLayer = L.featureGroup();
   popupLayer.addTo(map);
 
-  map.attributionControl.setPrefix("Mapzen, OpenStreetMap");
+  map.attributionControl.setPrefix("OpenStreetMap");
 
   var vectorLayer = Tangram.leafletLayer({ scene: "map-styles.yaml" });
   vectorLayer.addTo(map);
