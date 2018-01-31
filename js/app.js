@@ -30,6 +30,8 @@ window.DEBUG = window.location.search.indexOf("debug") > -1;
   map.attributionControl.setPrefix("OpenStreetMap");
 
   var vectorLayer = Tangram.leafletLayer({ scene: "map-styles.yaml" });
+  window.layer = vectorLayer;
+  console.log(vectorLayer);
   vectorLayer.addTo(map);
   var scene = vectorLayer.scene;
 
