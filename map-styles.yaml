@@ -3,6 +3,7 @@ global:
     water_color: '#a3c1db'
     labels_visible: true
     landuse_style: polygons
+    api_key: gGUd8F5tTSe2gRSPYnnLhg
 
 labels-global:
     - &freeway_labels         false
@@ -58,6 +59,8 @@ sources:
         url: https://{s}.tiles.nextzen.org/tilezen/vector/v1/256/all/{z}/{x}/{y}.topojson
         url_subdomains: [a,b,c,d]
         rasters: [normals]
+        url_params:
+            api_key: global.api_key
 
     normals:
         type: Raster
