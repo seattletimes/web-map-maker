@@ -76,13 +76,13 @@ install.patch(async function() {
     // This is here to patch a bug where a small pan of the map will result in
     // geojson/svg objects being cut off in the downloaded image
     // Someday we might have a real solution to the problem but until then ¯\_(ツ)_/¯
-    map.setZoom(map.getZoom() - 0.5);
-    map.setZoom(map.getZoom() + 0.5);
+    // map.setZoom(map.getZoom() - 0.5);
+    // map.setZoom(map.getZoom() + 0.5);
 
     // render SVG elements to the buffer (mostly GeoJSON)
     var svgRendering = $(".map svg").length ? drawSVG($.one(".map svg")) : Promise.resolve();
     await svgRendering;
-
+    
     // temporarily freeze popups in place using left/top instead of transform
     // html2canvas doesn't handle the transforms well
     var origin = mapElement.getBoundingClientRect();
