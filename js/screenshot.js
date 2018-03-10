@@ -105,8 +105,8 @@ install.patch(async function() {
       window.open(canvas.toDataURL("image/png"));
     } else {
       var link = document.createElement("a");
-      link.download = `st-map-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+      link.download = `st-map-${Date.now()}.jpg`;
+      link.href = canvas.toDataURL("image/jpg").replace("image/jpg", "image/octet-stream");
 
       // trigger download
       var click = new MouseEvent("click");
